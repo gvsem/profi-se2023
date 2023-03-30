@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+
+  santaserver:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    user: root
+    restart:
+      unless-stopped
+    volumes:
+      - ./deploy/files:/home/app/documents
