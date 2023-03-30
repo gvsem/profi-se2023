@@ -1,0 +1,304 @@
+openapi: '3.0.2'
+info:
+  title: Santa API
+  version: '1.0'
+servers:
+  - url: /
+paths:
+
+  /group:
+    post:
+      tags:
+        - Group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/post_group'
+            example:
+              {
+                "name": "string",
+                "description": "string",
+              }
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /groups:
+    get:
+      tags:
+        - Group
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/get_group'
+
+  /group/{group_id}:
+    parameters:
+      - in: path
+        name: group_id
+        schema:
+          type: string
+        required: true
+    get:
+      tags:
+        - Group
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_group_full'
+        '404':
+          description: Group not found
+          content:
+            text/plain: {}
+
+    put:
+      tags:
+        - Group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/put_group'
+            example:
+              {
+                "name": "string",
+                "description": "string",
+              }
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain: {}
+        '404':
+          description: Group not found
+          content:
+            text/plain: {}
+
+    delete:
+      tags:
+        - Group
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain: {}
+        '404':
+          description: Group not found
+          content:
+            text/plain: {}
+        '409':
+          description: Can not delete user, already in game
+          content:
+            text/plain: {}
+
+  /group/{group_id}/participant:
+    parameters:
+      - in: path
+        name: group_id
+        schema:
+          type: string
+        required: true
+
+    post:
+      tags:
+        - Participant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/post_participant'
+            example:
+              {
+                "name": "string",
+                "wish": "string",
+              }
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: Group not found
+          content:
+            text/plain: {}
+
+  /group/{group_id}/participant/{participant_id}:
+    parameters:
+      - in: path
+        name: group_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: participant_id
+        schema:
+          type: string
+        required: true
+
+    delete:
+      tags:
+        - Participant
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain: {}
+        '404':
+          description: Group or participant not found
+          content:
+            text/plain: {}
+
+
+  /group/{group_id}/toss:
+    parameters:
+      - in: path
+        name: group_id
+        schema:
+          type: string
+        required: true
+
+    post:
+      tags:
+        - Game
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/get_participant'
+        '404':
+          description: Group not found
+          content:
+            text/plain: {}
+        '409':
+          description: Not enough members
+          content:
+            text/plain: {}
+
+  /group/{group_id}/participant/{participant_id}/recipient:
+    parameters:
+      - in: path
+        name: group_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: participant_id
+        schema:
+          type: string
+        required: true
+
+    get:
+      tags:
+        - Game
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_participant'
+        '404':
+          description: Group or participant not found
+          content:
+            text/plain: {}
+
+components:
+  schemas:
+
+    post_group:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          nullable: false
+        description:
+          type: string
+
+    put_group:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+
+    get_group:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          nullable: false
+        name:
+          type: string
+          nullable: false
+        description:
+          type: string
+
+    get_group_full:
+      allOf:
+        - $ref: "#/components/schemas/get_group"
+        - type: object
+          required:
+            - participants
+          properties:
+            participants:
+              type: array
+              nullable: false
+              items:
+                $ref: "#/components/schemas/get_participant"
+
+    get_participant:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          nullable: false
+        name:
+          type: string
+          nullable: false
+        wish:
+          type: string
+        recipient:
+          $ref: "#/components/schemas/get_participant"
+
+    post_participant:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          nullable: false
+        wish:
+          type: string
